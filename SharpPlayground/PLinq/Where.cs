@@ -1,11 +1,10 @@
 ﻿
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace PLinq
 {
-    public static class LinqExtensions
+    public static partial class EnumberableExtensions
     {
 
         public static IEnumerable<T> Where<T>(this IEnumerable<T> source, Func<T, bool> predicate)
