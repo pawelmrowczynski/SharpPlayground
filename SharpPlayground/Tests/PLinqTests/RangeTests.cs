@@ -1,4 +1,4 @@
-﻿#define NORMAL_LINQ
+﻿///#define NORMAL_LINQ
 
 #if NORMAL_LINQ 
 using RangeClass = System.Linq.Enumerable; 
@@ -55,16 +55,9 @@ namespace PLinqTests
 
         [Theory]
         [InlineData(int.MaxValue, 4)]
-        public void IfCountCrossesMaximumInt_ExceptionIsThrown(int start, int range)
+        public void IfCountCrossesMaximumInt_ExceptionIsThrown(int start, int count)
         {
-            
-        }
-
-        
-        [Fact]
-        public void RangeCanGoUpToMaxInt()
-        {
-            
+            Assert.Throws<ArgumentOutOfRangeException>(() => RangeClass.Range(start, count));
         }
     }
 }
