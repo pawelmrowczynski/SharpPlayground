@@ -1,9 +1,9 @@
 ﻿//#define NORMAL_LINQ
 
 #if NORMAL_LINQ 
-using EmptyClass = System.Linq.Enumerable; 
+using Linq = System.Linq.Enumerable; 
 #else 
-using EmptyClass = PLinq.EnumberableExtensions; 
+using Linq = PLinq.EnumberableExtensions; 
 #endif
 using Xunit;
 
@@ -14,7 +14,7 @@ namespace PLinqTests
         [Fact]
         public void EmptyContainsNoElements()
         {
-            using (var empty = EmptyClass.Empty<int>().GetEnumerator())
+            using (var empty = Linq.Empty<int>().GetEnumerator())
             {
                 Assert.False(empty.MoveNext());
             }
@@ -23,13 +23,13 @@ namespace PLinqTests
         [Fact]
         public void EmptyIsASingletonPerElementType()
         {
-            Assert.Same(EmptyClass.Empty<int>(), EmptyClass.Empty<int>());
-            Assert.Same(EmptyClass.Empty<long>(), EmptyClass.Empty<long>());
-            Assert.Same(EmptyClass.Empty<string>(), EmptyClass.Empty<string>());
-            Assert.Same(EmptyClass.Empty<object>(), EmptyClass.Empty<object>());
+            Assert.Same(Linq.Empty<int>(), Linq.Empty<int>());
+            Assert.Same(Linq.Empty<long>(), Linq.Empty<long>());
+            Assert.Same(Linq.Empty<string>(), Linq.Empty<string>());
+            Assert.Same(Linq.Empty<object>(), Linq.Empty<object>());
 
-            Assert.NotSame(EmptyClass.Empty<long>(), EmptyClass.Empty<int>());
-            Assert.NotSame(EmptyClass.Empty<string>(), EmptyClass.Empty<object>());
+            Assert.NotSame(Linq.Empty<long>(), Linq.Empty<int>());
+            Assert.NotSame(Linq.Empty<string>(), Linq.Empty<object>());
         }
     }
 }
