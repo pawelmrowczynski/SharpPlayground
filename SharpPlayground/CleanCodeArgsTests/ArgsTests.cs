@@ -32,5 +32,14 @@ namespace CleanCodeArgsTests
             bool logging = args.getBoolean('l');
             Assert.False(logging);
         }
+
+        [Fact]
+        public void SettingAStringParamWorksCorrectly()
+        {
+            var arguments = new string[] { "-d test" };
+            var args = new Args("d*", arguments);
+            string stringArgValue = args.getString('d');
+            Assert.Equal("test", stringArgValue);
+        }
     }
 }

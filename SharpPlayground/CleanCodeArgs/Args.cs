@@ -11,7 +11,9 @@ namespace CleanCodeArgs
         private bool valid;
         private HashSet<char> unexpectedArguments = new HashSet<char>();
         private Dictionary<char, bool> boolArgs = new Dictionary<char, bool>();
-        private int numberOfArgs = 0;
+        private Dictionary<char, string> stringArgs = new Dictionary<char, string>();
+        private HashSet<char> argsFound = new HashSet<char>();
+        private int currentArgument = 0;
 
         public Args(string schema, string[] args)
         {
@@ -20,6 +22,7 @@ namespace CleanCodeArgs
             valid = parse();
         }
 
+        #region API
         public string usage()
         {
             if (schema.Length > 0)
@@ -46,6 +49,14 @@ namespace CleanCodeArgs
             return boolArgs[arg];
         }
 
+        public string getString(char arg)
+        {
+            return stringArgs[arg];
+        }
+        #endregion
+
+
+        #region Error Handling
         private string unexpectedArgumentCountMessage()
         {
             StringBuilder message = new StringBuilder("Argument(y) -");
@@ -56,6 +67,7 @@ namespace CleanCodeArgs
             message.Append(" nieoczekiwany");
             return message.ToString();
         }
+        #endregion
 
         private bool parse()
         {
@@ -67,6 +79,10 @@ namespace CleanCodeArgs
             parseArgs();
             return unexpectedArguments.Count == 0;
         }
+
+
+        #region PARSING ARGUMENTS
+
 
         private void parseArgs()
         {
@@ -94,15 +110,54 @@ namespace CleanCodeArgs
 
         private void parseElement(char argChar)
         {
-            if (isBoolean(argChar))
+            if (TrySetArgument(argChar))
             {
-                numberOfArgs++;
-                setBooleanArg(argChar, true);
+                argsFound.Add(argChar);
             }
             else
             {
                 unexpectedArguments.Add(argChar);
             }
+
+
+            
+        }
+
+        private bool TrySetArgument(char argChar)
+        {
+            if (isBooleanArgument(argChar))
+            {
+                setBooleanArg(argChar, true);
+                return true;
+            }
+            else if (IsStringArgument(argChar))
+            {
+                setStringArg(argChar, "");
+                return true;
+            }
+            else
+            {
+                unexpectedArguments.Add(argChar);
+                return true;
+            }
+        }
+
+        private void setStringArg(char argChar, string v)
+        {
+            currentArgument++;
+            try
+            {
+                stringArgs.Add(argChar, args[currentArgument]);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private bool IsStringArgument(char argChar)
+        {
+            return stringArgs.ContainsKey(argChar);
         }
 
         private void setBooleanArg(char argChar, bool value)
@@ -113,35 +168,64 @@ namespace CleanCodeArgs
             }
         }
 
-        private bool isBoolean(char c)
+        private bool isBooleanArgument(char c)
         {
             return boolArgs.ContainsKey(c);
         }
+        #endregion
 
+
+        #region PARSING SCHEMA
         private bool parseSchema()
         {
             foreach (var element in schema.Split(','))
             {
-                parseSchemaElement(element);
+                if (element.Length > 0)
+                {
+                    var trimmedSchemaElement = element.Trim();
+                    parseSchemaElement(trimmedSchemaElement);
+                }
             }
             return true;
         }
 
-        private void parseSchemaElement(string element)
+        private void parseSchemaElement(string schemaElement)
         {
-            if (element.Length == 1)
+            var schemaElementCharId = schemaElement[0];
+            var schemaElementTail = schemaElement.Substring(1);
+            if (!char.IsLetter(schemaElementCharId))
             {
-                parseBooleanSchemaElement(element);
+                throw new Exception("Bad argument char passed (please use letters)");
+            }
+            if (IsSchemaElementBool(schemaElementTail))
+            {
+                parseBooleanSchemaElement(schemaElementCharId);
+            }
+            else if (IsSchemaElementString(schemaElementTail))
+            {
+                parseStringSchemaElement(schemaElementCharId);
             }
         }
 
-        private void parseBooleanSchemaElement(string element)
+        private bool IsSchemaElementString(string elementTail)
         {
-            char c = element[0];
-            if (char.IsLetter(c))
-            {
-                boolArgs.Add(c, false);
-            }
+            return elementTail == "*";
         }
+
+        private static bool IsSchemaElementBool(string elementTail)
+        {
+            return elementTail.Length == 0;
+        }
+
+        private void parseBooleanSchemaElement(char elementCharId)
+        {
+            boolArgs.Add(elementCharId, false);
+        }
+
+        private void parseStringSchemaElement(char elementCharId)
+        {
+            stringArgs.Add(elementCharId, "");
+        }
+        #endregion
     }
 }
